@@ -1,5 +1,5 @@
-rede: main.o lista.o
-	gcc -o rede main.o lista.o -lpthread -fopenmp
+parell: main.o lista.o
+	gcc -o parell main.o lista.o -lpthread -fopenmp
 
 main.o: main.c lista.h
 	gcc -c main.c
