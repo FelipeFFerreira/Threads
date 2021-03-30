@@ -8,7 +8,7 @@
 
 #define rand1() (rand() / (tipoDado)RAND_MAX)
 
-#define N 500 //DEFINA O TAMANO DA MATRIZ AQUI
+#define N 500000000 //DEFINA O TAMANO DA MATRIZ AQUI
 #define threads 6 //DEFINA A QUANTIDADE DE THREADS AQUI
 #define WAIT 0
 #define READY 1
@@ -54,7 +54,6 @@ void * solicitacaoArquivo(void * argsArq)
 			for (j = 0; j < N; j++) {
 				while(sem_control.state);
 				fprintf(_argssArq->arq, "%d  ", matrizResultante[i][j]);
-				//fprintf(_argssArq->arq, "%d\n", i); 
 			}
 			fprintf(_argssArq->arq, "%c", '\n'); 
 			_argssArq->statusArq[i] = EXECUTED;
@@ -75,18 +74,17 @@ void * multiplicacao(void * argss)
 	
     args * _argss = (args *)argss;
     lst_ptr p;
-	int i, j;
+	int j;
 	p = _argss->lista;
 	
-	while(p != NULL) {
-		for(i = 0;  i < N; i++) {
-			for(j = 0; j < N; j++) {
-				matrizResultante[p->dado][i] += matriz_1[p->dado][j] * matrizIndentidade[j][i];
-			}
-			_argss->ptrArq->statusArq[p->dado] = READY;
+	while (p != NULL) {
+		for (j = 0;  j < N; j++) {
+			matrizResultante[p->dado][j] += matriz_1[p->dado][j] * matrizIndentidade[p->dado][j];
 		}
+		_argss->ptrArq->statusArq[p->dado] = READY; //libera para escrita no arquivo
 		p = p->prox;
 	}
+		
 
 	pthread_exit( (void*) 0 );//Legado do retorno
 }
@@ -94,16 +92,17 @@ void * multiplicacao(void * argss)
 
 void criarMatrizIdentidade()
 {
-	int i;
-	for(i = 0; i < N; i++) {
-		matrizIndentidade[i][i] = 1;
+	int i, j;
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < N; j++)
+			matrizIndentidade[i][j] = j + 1;
 	}
 }
 
 void criarMatrizRandomica()
 {
 	
-	int i, j, cont = 0;
+	int i, j;
 	for(i = 0; i < N; i++) {
 		for(j = 0 ; j < N; j++) {
 			matriz_1[i][j] = j + 1; //rand1();
@@ -134,7 +133,7 @@ void imprimirMatriz(tipoDado matriz[][N])
 FILE *open_arquivo(char * c) {
 
     FILE * arq; // Arquivo lógico     
-    if ((arq = fopen("result_mult_matriz_th.txt", c)) == NULL) {
+    if ((arq = fopen("result_mult_matriz_th.csv", c)) == NULL) {
         fprintf(stderr, "Erro na abertura do arquivo %s\n", "filename");
      }
 
@@ -211,13 +210,13 @@ int main ()
 	fclose(_argsArq.arq);
 
 	
-	print_responsabilidade_thread(_args);
+	//print_responsabilidade_thread(_args);
 	
 
-	imprimirMatriz(matrizResultante);
+	//imprimirMatriz(matrizResultante);
 
 	printf("\nTerminando processo ...\n");
-	printf("Tempo Total Do Processo: %gs\n\n",(float) (clock() - tempo)  / CLOCKS_PER_SEC);
+	printf("Tempo Total Do Processo Para Processa %s informaçoes: %gs\n\n", (N * N) >= 1000000000 ? "1 BILHÃO" : "MENOS QUE UM BILHAO", (float) (clock() - tempo)  / CLOCKS_PER_SEC);
 
 	return EXIT_SUCCESS;
 }
