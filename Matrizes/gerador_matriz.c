@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define N 8000 //DEFINA O TAMANO DA MATRIZ AQUI
+#define N 1000 //DEFINA O TAMANO DA MATRIZES A SEREM GERADAS AQUI
 
 
 typedef unsigned long long int tipoDado;
